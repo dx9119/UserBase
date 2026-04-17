@@ -16,6 +16,9 @@
                         <h4 class="mb-0" th:text="#{error.title}">Ошибка</h4>
                     </div>
                     <div class="card-body">
+                        <div class="text-end mb-3">
+                            <div th:replace="~{fragments/theme-toggle :: theme-toggle}"></div>
+                        </div>
                         <div class="alert alert-danger">
                             <p class="mb-1"><strong th:text="#{error.httpStatus}">HTTP код</strong>: <span th:text="${httpStatus}">-</span></p>
                             <p class="mb-1"><strong th:text="#{error.time}">Время</strong>: <span th:text="${errorTime}">-</span></p>
@@ -32,5 +35,6 @@
         </div>
     </div>
     <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+<script th:src="@{/js/theme.js}"></script>
 </body>
 </html>

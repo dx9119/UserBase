@@ -16,7 +16,8 @@
                         <h4 class="mb-0" th:text="#{register.title}">Регистрация</h4>
                     </div>
                     <div class="card-body">
-                        <div class="mb-3 text-end">
+                        <div class="mb-3 text-end d-flex justify-content-end align-items-center">
+                            <div th:replace="~{fragments/theme-toggle :: theme-toggle}"></div>
                             <div th:replace="~{fragments/language-selector :: language-selector}"></div>
                         </div>
                         <form th:action="@{/register}" method="post">
@@ -44,5 +45,6 @@
     </div>
 
     <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+<script th:src="@{/js/theme.js}"></script>
 </body>
 </html>
