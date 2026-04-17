@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras-spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="#{profile.title}">Профиль</title>
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body class="bg-light">
+    <nav th:replace="~{fragments/layout :: nav}"></nav>
+
+    <div class="container mt-4">
+        <h1 class="mb-4" th:text="#{profile.title}">Профиль</h1>
+        
+        <h2 class="h4" th:text="#{profile.account}">Информация об аккаунте</h2>
+        <div class="table-responsive mb-4">
+            <table class="table table-dark table-borderless rounded">
+                <thead>
+                    <tr>
+                        <th th:text="#{profile.field}">Поле</th>
+                        <th th:text="#{profile.value}">Значение</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td th:text="#{profile.username}">Имя пользователя</td>
+                        <td th:text="${username}">-</td>
+                    </tr>
+                    <tr>
+                        <td th:text="#{profile.userId}">ID пользователя</td>
+                        <td th:text="${userId}">-</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <h2 class="h4" th:text="#{profile.roles}">Роли и права</h2>
+        <div class="table-responsive mb-4">
+            <table class="table table-dark table-borderless rounded">
+                <thead>
+                    <tr>
+                        <th th:text="#{profile.role}">Роль</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="authority : ${authorities}">
+                        <td th:text="${authority.authority}">-</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <h2 class="h4" th:text="#{profile.authDetails}">Информация об аутентификации</h2>
+        <div class="table-responsive mb-4">
+            <table class="table table-dark table-borderless rounded">
+                <thead>
+                    <tr>
+                        <th th:text="#{profile.field}">Поле</th>
+                        <th th:text="#{profile.value}">Значение</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td th:text="#{profile.authenticated}">Аутентифицирован</td>
+                        <td th:text="${isAuthenticated}">-</td>
+                    </tr>
+                    <tr>
+                        <td th:text="#{profile.sessionId}">ID сессии</td>
+                        <td th:text="${sessionId}">-</td>
+                    </tr>
+                    <tr>
+                        <td th:text="#{profile.sessionCreated}">Сессия создана</td>
+                        <td th:text="${sessionCreated}">-</td>
+                    </tr>
+                    <tr>
+                        <td th:text="#{profile.sessionAccessed}">Последний доступ</td>
+                        <td th:text="${sessionLastAccessed}">-</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="d-flex flex-column flex-sm-row gap-2">
+            <a th:href="@{/home}" class="btn btn-secondary" th:text="#{profile.backHome}">На главную</a>
+            <a th:href="@{/profile/change-password}" class="btn btn-warning" th:text="#{password.title}">Смена пароля</a>
+        </div>
+    </div>
+
+    <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+</body>
+</html>

@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="#{admin.title}">Админка</title>
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body class="bg-light">
+    <nav th:replace="~{fragments/layout :: nav}"></nav>
+
+    <div class="container mt-4">
+        <h1 class="mb-4" th:text="#{admin.title}">Админка</h1>
+
+        <div class="mb-4">
+            <form th:action="@{/admin}" method="get" class="d-flex flex-column gap-2">
+                <div class="d-flex gap-2">
+                    <input type="text" name="name" class="form-control" 
+                           th:placeholder="#{admin.search.placeholder}"
+                           th:value="${searchName != null ? searchName : ''}">
+                    <button type="submit" class="btn btn-primary" th:text="#{admin.search.button}">Найти</button>
+                    <a th:href="@{/admin}" class="btn btn-secondary" th:text="#{admin.search.clear}">Очистить</a>
+                </div>
+                <div class="d-flex gap-2">
+                    <input type="date" name="from" class="form-control" 
+                           th:value="${searchFrom != null ? searchFrom : ''}"
+                           th:placeholder="#{admin.search.from}">
+                    <input type="date" name="to" class="form-control" 
+                           th:value="${searchTo != null ? searchTo : ''}"
+                           th:placeholder="#{admin.search.to}">
+                </div>
+            </form>
+        </div>
+        
+        <div th:if="${param.updated}" class="alert alert-success" th:text="#{admin.updated}">Пользователь обновлен</div>
+        <div th:if="${param.deleted}" class="alert alert-success" th:text="#{admin.deleted}">Пользователь удален</div>
+        <div th:if="${param.disabled}" class="alert alert-success" th:text="#{admin.disabled}">Пользователь отключен</div>
+        <div th:if="${param.enabled}" class="alert alert-success" th:text="#{admin.enabled.success}">Пользователь включен</div>
+        
+        <div class="row">
+            <div class="col-12 col-sm-6 col-md-4 mb-4" th:each="user : ${users}">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0" th:text="${user.username}">username</h5>
+                    </div>
+                    <div class="card-body">
+                        <p><span class="text-secondary" th:text="#{admin.userId}">ID:</span> <span th:text="${user.id}">-</span></p>
+                        <p><span class="text-secondary" th:text="#{admin.status}">Статус:</span> 
+                            <span th:class="${user.enabled ? 'badge text-success' : 'badge text-danger'}" 
+                                  th:text="${user.enabled ? 'Active' : 'Disabled'}">-</span>
+                        </p>
+                        <p><span class="text-secondary" th:text="#{admin.role}">Роль:</span> 
+                            <span th:each="role : ${user.roles}" th:text="${role}" class="badge">-</span>
+                        </p>
+                    </div>
+                    <div class="card-footer">
+                        <div class="d-flex flex-column flex-sm-row justify-content-between gap-2 mb-2">
+                            <div class="d-flex gap-2 flex-fill">
+                                <a th:href="@{/admin/user/{id}/edit(id=${user.id})}" class="btn btn-sm btn-outline-primary flex-fill" th:text="#{admin.edit}">Изменить</a>
+                                <a th:href="@{/admin/history/{id}(id=${user.id})}" class="btn btn-sm btn-outline-info flex-fill" th:text="#{admin.history.short}">История</a>
+                            </div>
+                            <div class="d-flex gap-2 flex-fill">
+                                <button type="button" class="btn btn-sm btn-outline-warning flex-fill" th:text="#{admin.disable}"
+                                        data-bs-toggle="modal" data-bs-target="#disableModal"
+                                        th:data-user-id="${user.id}" th:if="${user.enabled}">Отключить</button>
+                                <button type="button" class="btn btn-sm btn-outline-success flex-fill" th:text="#{admin.enable}"
+                                        data-bs-toggle="modal" data-bs-target="#enableModal"
+                                        th:data-user-id="${user.id}" th:unless="${user.enabled}">Включить</button>
+                                <button type="button" class="btn btn-sm btn-outline-danger flex-fill" th:text="#{admin.delete}"
+                                        data-bs-toggle="modal" data-bs-target="#deleteModal"
+                                        th:data-user-id="${user.id}">Удалить</button>
+                            </div>
+                        </div>
+                        <form th:id="'deleteForm-' + ${user.id}" method="post" class="d-inline">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                        </form>
+                        <form th:id="'disableForm-' + ${user.id}" method="post" class="d-inline">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                            <input type="hidden" name="reason" th:id="'disableReasonInput-' + ${user.id}"/>
+                        </form>
+                        <form th:id="'enableForm-' + ${user.id}" method="post" class="d-inline">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                            <input type="hidden" name="reason" th:id="'enableReasonInput-' + ${user.id}"/>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <nav th:if="${totalPages > 1}" aria-label="Page navigation">
+            <ul class="pagination justify-content-center">
+                <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                    <a class="page-link" th:href="@{/admin(page=${currentPage - 1}, name=${searchName}, from=${searchFrom}, to=${searchTo})}" th:text="#{admin.pagination.prev}">Предыдущая</a>
+                </li>
+                <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}" th:classappend="${i == currentPage} ? 'active'">
+                    <a class="page-link" th:href="@{/admin(page=${i}, name=${searchName}, from=${searchFrom}, to=${searchTo})}" th:text="${i + 1}">1</a>
+                </li>
+                <li class="page-item" th:classappend="${currentPage >= totalPages - 1} ? 'disabled'">
+                    <a class="page-link" th:href="@{/admin(page=${currentPage + 1}, name=${searchName}, from=${searchFrom}, to=${searchTo})}" th:text="#{admin.pagination.next}">Следующая</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModalLabel" th:text="#{admin.delete.title}">Подтверждение удаления</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p th:text="#{admin.delete.message}">Вы уверены, что хотите удалить пользователя?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" th:text="#{admin.delete.cancel}">Отмена</button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteBtn" th:text="#{admin.delete.confirm}">Удалить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="disableModal" tabindex="-1" aria-labelledby="disableModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="disableModalLabel" th:text="#{admin.disable.title}">Подтверждение отключения</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p th:text="#{admin.disable.message}">Вы уверены, что хотите отключить пользователя?</p>
+                    <label th:text="#{admin.reason}" class="form-label">Причина изменения</label>
+                    <textarea id="disableReason" class="form-control" rows="3" required></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" th:text="#{admin.delete.cancel}">Отмена</button>
+                    <button type="button" class="btn btn-warning" id="confirmDisableBtn" th:text="#{admin.disable.confirm}">Отключить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="enableModal" tabindex="-1" aria-labelledby="enableModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="enableModalLabel" th:text="#{admin.enable.title}">Подтверждение включения</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p th:text="#{admin.enable.message}">Вы уверены, что хотите включить пользователя?</p>
+                    <label th:text="#{admin.reason}" class="form-label">Причина изменения</label>
+                    <textarea id="enableReason" class="form-control" rows="3" required></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" th:text="#{admin.delete.cancel}">Отмена</button>
+                    <button type="button" class="btn btn-success" id="confirmEnableBtn" th:text="#{admin.enable.confirm}">Включить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var deleteModal = document.getElementById('deleteModal');
+            var confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+
+            deleteModal.addEventListener('show.bs.modal', function(event) {
+                var button = event.relatedTarget;
+                var userId = button.getAttribute('data-user-id');
+                confirmDeleteBtn.setAttribute('data-user-id', userId);
+            });
+
+            confirmDeleteBtn.addEventListener('click', function() {
+                var userId = this.getAttribute('data-user-id');
+                var form = document.getElementById('deleteForm-' + userId);
+                form.action = '/admin/user/' + userId + '/delete';
+                form.submit();
+            });
+
+            var disableModal = document.getElementById('disableModal');
+            var confirmDisableBtn = document.getElementById('confirmDisableBtn');
+
+            disableModal.addEventListener('show.bs.modal', function(event) {
+                var button = event.relatedTarget;
+                var userId = button.getAttribute('data-user-id');
+                confirmDisableBtn.setAttribute('data-user-id', userId);
+            });
+
+            confirmDisableBtn.addEventListener('click', function() {
+                var userId = this.getAttribute('data-user-id');
+                var reason = document.getElementById('disableReason').value;
+                var form = document.getElementById('disableForm-' + userId);
+                document.getElementById('disableReasonInput-' + userId).value = reason;
+                form.action = '/admin/user/' + userId + '/disable';
+                form.submit();
+            });
+
+            var enableModal = document.getElementById('enableModal');
+            var confirmEnableBtn = document.getElementById('confirmEnableBtn');
+
+            enableModal.addEventListener('show.bs.modal', function(event) {
+                var button = event.relatedTarget;
+                var userId = button.getAttribute('data-user-id');
+                confirmEnableBtn.setAttribute('data-user-id', userId);
+            });
+
+            confirmEnableBtn.addEventListener('click', function() {
+                var userId = this.getAttribute('data-user-id');
+                var reason = document.getElementById('enableReason').value;
+                var form = document.getElementById('enableForm-' + userId);
+                document.getElementById('enableReasonInput-' + userId).value = reason;
+                form.action = '/admin/user/' + userId + '/enable';
+                form.submit();
+            });
+        });
+    </script>
+</body>
+</html>

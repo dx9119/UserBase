@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras-spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="#{admin.editTitle}">Редактирование пользователя</title>
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body class="bg-light">
+    <nav th:replace="~{fragments/layout :: nav}"></nav>
+
+    <div class="container">
+        <div class="row justify-content-center mt-5">
+            <div class="col-11 col-sm-10 col-md-6">
+                <div class="card">
+                    <div class="card-header bg-warning">
+                        <h4 class="mb-0" th:text="#{admin.editTitle}">Редактирование пользователя</h4>
+                    </div>
+                    <div class="card-body">
+                        <form th:action="@{/admin/user/{id}/update(id=${user.id})}" method="post">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                            <div class="mb-3">
+                                <label th:text="#{login.username}" class="form-label">Имя пользователя</label>
+                                <div class="d-flex align-items-center">
+                                    <span th:text="${user.username}" class="me-2">username</span>
+                                    <span class="badge bg-secondary" data-bs-toggle="tooltip" data-bs-placement="right" th:title="#{admin.username.readonly}">?</span>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label th:text="#{admin.role}" class="form-label">Роль</label>
+                                <select id="roleSelect" name="roles" class="form-select" required>
+                                    <option value="" th:text="#{admin.selectRole}" disabled>Выберите роль</option>
+                                    <option th:each="role : ${T(org.ukhanov.userbase.auth.model.Role).values()}"
+                                            th:value="${role}"
+                                            th:text="${role}"
+                                            th:selected="${user.roles.contains(role)}">
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label th:text="#{admin.reason}" class="form-label">Причина изменения</label>
+                                <textarea name="reason" class="form-control" rows="3" required></textarea>
+                            </div>
+                            <div class="d-grid">
+                                <button id="saveBtn" type="submit" class="btn btn-warning" th:text="#{admin.save}" disabled>Сохранить</button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="card-footer text-center">
+                        <a th:href="@{/admin}" th:text="#{admin.back}">Назад к списку</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        document.addEventListener('DOMContentLoaded', function() {
+            var roleSelect = document.getElementById('roleSelect');
+            var saveBtn = document.getElementById('saveBtn');
+            var originalRole = roleSelect.value;
+
+            roleSelect.addEventListener('change', function() {
+                saveBtn.disabled = (this.value === originalRole || this.value === '');
+            });
+        });
+        /*]]>*/
+    </script>
+</body>
+</html>

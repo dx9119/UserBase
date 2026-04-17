@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="#{home.title}">Главная</title>
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body class="bg-light">
+    <nav th:replace="~{fragments/layout :: nav}"></nav>
+
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-11 col-sm-10 col-md-8 text-center">
+                <h1 class="display-4"><span th:text="#{home.welcome}">Добро пожаловать</span>, <span th:text="${username}">User</span>!</h1>
+                <p class="lead" th:text="#{home.logged}">Вы вошли в систему</p>
+                <a th:href="@{/profile}" class="btn btn-primary btn-lg mt-3" th:text="#{profile.title}">Профиль</a>
+            </div>
+        </div>
+    </div>
+
+    <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+</body>
+</html>
