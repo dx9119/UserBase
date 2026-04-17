@@ -31,7 +31,7 @@
                                 <label th:text="#{admin.role}" class="form-label">Роль</label>
                                 <select id="roleSelect" name="roles" class="form-select" required>
                                     <option value="" th:text="#{admin.selectRole}" disabled>Выберите роль</option>
-                                    <option th:each="role : ${T(org.ukhanov.userbase.auth.model.Role).values()}"
+                                    <option th:each="role : ${T(org.ukhanov.userbase.user.model.Role).values()}"
                                             th:value="${role}"
                                             th:text="${role}"
                                             th:selected="${user.roles.contains(role)}">
